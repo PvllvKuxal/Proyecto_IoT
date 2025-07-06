@@ -22,13 +22,17 @@ public class DeviceController {
     public DeviceDTO registerDevice(@RequestBody DeviceDTO deviceDTO) {
         try {
             return deviceService.registerDevice(deviceDTO);
+        } catch (IllegalArgumentException e) {
+            // Errores de validación o dispositivo duplicado
+            throw new ResponseStatusException(
+                    HttpStatus.BAD_REQUEST, e.getMessage(), e);
         } catch (Exception e) {
+            // Otros errores internos
             throw new ResponseStatusException(
                     HttpStatus.INTERNAL_SERVER_ERROR, "Error al registrar el dispositivo", e);
         }
     }
 
-    // Eliminar un dispositivo de ThingsBoard (aun sin impkementar )
     @DeleteMapping("/{deviceId}")
     public void deleteDevice(@PathVariable String deviceId) {
         try {
@@ -39,7 +43,6 @@ public class DeviceController {
         }
     }
 
-    // Obtener la última telemetría del dispositivo
     @GetMapping("/{deviceId}/telemetry")
     public Map<String, Object> getTelemetry(@PathVariable String deviceId) {
         try {
@@ -50,11 +53,9 @@ public class DeviceController {
         }
     }
 
-    // Endpoint SSE para telemetría en tiempo real
     @CrossOrigin(origins = "*")
     @GetMapping(value = "/sse/{deviceId}", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
     public SseEmitter streamTelemetry(@PathVariable String deviceId) {
-        // Timeout en milisegundos (0 = nunca expira)
         SseEmitter emitter = new SseEmitter(0L);
 
         Thread thread = new Thread(() -> {
@@ -64,12 +65,11 @@ public class DeviceController {
                         Map<String, Object> data = deviceService.getTelemetry(deviceId);
                         emitter.send(data);
                     } catch (Exception e) {
-                        // Si ocurre un error al obtener datos, envía un ping vacío para mantener la conexión
                         try {
                             emitter.send(SseEmitter.event().comment("ping"));
                         } catch (Exception ignored) {}
                     }
-                    Thread.sleep(1000); // cada 1 segundo
+                    Thread.sleep(1000);
                 }
             } catch (Exception e) {
                 emitter.completeWithError(e);
