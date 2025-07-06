@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>SSE Telemetría - Prueba</title>
+    <style>
+        body { font-family: Arial, sans-serif; }
+        #output { background: #f4f4f4; padding: 1em; border-radius: 5px; min-height: 200px; }
+        .param { font-weight: bold; }
+    </style>
+</head>
+<body>
+<h1>Telemetría en tiempo real (SSE)</h1>
+<label for="deviceId">Device ID:</label>
+<input type="text" id="deviceId" value="AQUI_TU_DEVICE_ID">
+<button id="conectar">Conectar</button>
+<button id="desconectar" disabled>Desconectar</button>
+<pre id="output"></pre>
+
+<script>
+    let es = null;
+
+    function mostrarDatos(data) {
+        let obj;
+        try {
+            obj = typeof data === "string" ? JSON.parse(data) : data;
+        } catch (e) {
+            document.getElementById('output').textContent += "\nError de formato JSON\n";
+            return;
+        }
+        let texto = '';
+        for (const key of Object.keys(obj)) {
+            const arr = obj[key];
+            if (Array.isArray(arr) && arr.length > 0) {
+                const { ts, value } = arr[0];
+                texto += `\n${key}: ${value} (ts: ${ts})`;
+            }
+        }
+        document.getElementById('output').textContent += texto + '\n';
+    }
+
+    document.getElementById('conectar').onclick = function() {
+        const deviceId = document.getElementById('deviceId').value.trim();
+        document.getElementById('output').textContent = '';
+        if (!deviceId) {
+            alert("Ingresa el Device ID.");
+            return;
+        }
+        const url = `http://localhost:8080/api/devices/sse/${deviceId}`;
+        es = new EventSource(url);
+
+        es.onopen = () => {
+            document.getElementById('output').textContent += 'Conectado por SSE\n';
+            document.getElementById('conectar').disabled = true;
+            document.getElementById('desconectar').disabled = false;
+        };
+
+        es.onmessage = (event) => {
+            mostrarDatos(event.data);
+        };
+
+        es.onerror = (e) => {
+            document.getElementById('output').textContent += '\nError en SSE o conexión cerrada\n';
+            document.getElementById('conectar').disabled = false;
+            document.getElementById('desconectar').disabled = true;
+            es.close();
+            es = null;
+        };
+    };
+
+    document.getElementById('desconectar').onclick = function() {
+        if (es) {
+            es.close();
+            document.getElementById('output').textContent += '\nDesconectado.\n';
+            document.getElementById('conectar').disabled = false;
+            document.getElementById('desconectar').disabled = true;
+            es = null;
+        }
+    };
+</script>
+</body>
+</html>
