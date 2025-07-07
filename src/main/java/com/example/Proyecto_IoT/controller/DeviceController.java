@@ -1,6 +1,5 @@
 package com.example.Proyecto_IoT.controller;
-import org.springframework.web.server.ResponseStatusException;
-import org.springframework.http.HttpStatus;
+
 import com.example.Proyecto_IoT.service.DeviceService;
 import com.example.Proyecto_IoT.dto.DeviceDTO;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,39 +19,25 @@ public class DeviceController {
     // Crear/registrar un dispositivo en ThingsBoard
     @PostMapping
     public DeviceDTO registerDevice(@RequestBody DeviceDTO deviceDTO) {
-        try {
-            return deviceService.registerDevice(deviceDTO);
-        } catch (IllegalArgumentException e) {
-            // Errores de validación o dispositivo duplicado
-            throw new ResponseStatusException(
-                    HttpStatus.BAD_REQUEST, e.getMessage(), e);
-        } catch (Exception e) {
-            // Otros errores internos
-            throw new ResponseStatusException(
-                    HttpStatus.INTERNAL_SERVER_ERROR, "Error al registrar el dispositivo", e);
-        }
+        // Lanza excepciones, serán capturadas por el handler global
+        return deviceService.registerDevice(deviceDTO);
     }
 
     @DeleteMapping("/{deviceId}")
     public void deleteDevice(@PathVariable String deviceId) {
-        try {
-            deviceService.deleteDevice(deviceId);
-        } catch (Exception e) {
-            throw new ResponseStatusException(
-                    HttpStatus.INTERNAL_SERVER_ERROR, "Error al eliminar el dispositivo", e);
-        }
+        deviceService.deleteDevice(deviceId);
     }
 
     @GetMapping("/{deviceId}/telemetry")
     public Map<String, Object> getTelemetry(@PathVariable String deviceId) {
-        try {
-            return deviceService.getTelemetry(deviceId);
-        } catch (Exception e) {
-            throw new ResponseStatusException(
-                    HttpStatus.INTERNAL_SERVER_ERROR, "Error al obtener la telemetría", e);
-        }
+        return deviceService.getTelemetry(deviceId);
     }
 
+
+    /*     * Endpoint para recibir datos de telemetría en tiempo real usando Server-Sent Events (SSE)
+     * Este endpoint permite a los clientes suscribirse a actualizaciones de telemetría
+     * del dispositivo especificado por deviceId.
+     */
     @CrossOrigin(origins = "*")
     @GetMapping(value = "/sse/{deviceId}", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
     public SseEmitter streamTelemetry(@PathVariable String deviceId) {

@@ -46,7 +46,37 @@ public class DeviceService {
 
         try {
             ResponseEntity<DeviceDTO> response = restTemplate.postForEntity(url, request, DeviceDTO.class);
-            return response.getBody();
+            DeviceDTO savedDevice = response.getBody();
+
+            // --- Configuración automática de credenciales MQTT_BASIC ---
+            if (savedDevice != null && savedDevice.getId() != null && savedDevice.getId().getId() != null) {
+                String deviceId = savedDevice.getId().getId();
+                String credentialsUrl = tbApiUrl + "/api/device/" + deviceId + "/credentials";
+
+                // Puedes personalizar estos valores o generarlos aleatoriamente
+                String clientId = "client-" + deviceId;
+                String userName = "user-" + deviceId;
+                String password = "pass-" + deviceId;
+
+                String credentialsValue = String.format("{\"clientId\":\"%s\",\"userName\":\"%s\",\"password\":\"%s\"}", clientId, userName, password);
+
+                Map<String, Object> credBody = new java.util.HashMap<>();
+                credBody.put("credentialsType", "MQTT_BASIC");
+                credBody.put("credentialsId", clientId);
+                credBody.put("credentialsValue", credentialsValue);
+
+                HttpEntity<Map<String, Object>> credRequest = new HttpEntity<>(credBody, headers);
+                restTemplate.exchange(credentialsUrl, HttpMethod.PUT, credRequest, Void.class);
+
+                // Puedes devolver los datos MQTT en el DeviceDTO usando additionalInfo
+                Map<String, Object> mqttInfo = new java.util.HashMap<>();
+                mqttInfo.put("clientId", clientId);
+                mqttInfo.put("userName", userName);
+                mqttInfo.put("password", password);
+                savedDevice.setAdditionalInfo(mqttInfo);
+            }
+
+            return savedDevice;
         } catch (HttpClientErrorException.BadRequest e) {
             // Capturar específicamente errores 400 de ThingsBoard
             String errorBody = e.getResponseBodyAsString();
@@ -61,13 +91,18 @@ public class DeviceService {
         }
     }
 
-    // Resto de métodos sin cambios...
     public void deleteDevice(String deviceId) {
         String url = tbApiUrl + "/api/device/" + deviceId;
         HttpHeaders headers = new HttpHeaders();
         headers.set("X-Authorization", "Bearer " + thingsBoardAuthService.getJwtToken());
         HttpEntity<Void> request = new HttpEntity<>(headers);
-        restTemplate.exchange(url, HttpMethod.DELETE, request, Void.class);
+        try {
+            restTemplate.exchange(url, HttpMethod.DELETE, request, Void.class);
+        } catch (HttpClientErrorException.NotFound e) {
+            throw new IllegalArgumentException("Dispositivo no encontrado");
+        } catch (Exception e) {
+            throw new RuntimeException("Error interno al eliminar el dispositivo");
+        }
     }
 
     public Map<String, Object> getTelemetry(String deviceId) {
