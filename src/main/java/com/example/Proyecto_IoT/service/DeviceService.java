@@ -3,6 +3,7 @@ package com.example.Proyecto_IoT.service;
 import com.example.Proyecto_IoT.dto.device.RequestDeviceDTO;
 import com.example.Proyecto_IoT.dto.device.DeviceDTO;
 import com.example.Proyecto_IoT.model.Device;
+import com.example.Proyecto_IoT.model.User;
 import com.example.Proyecto_IoT.repository.DeviceRepository;
 import com.example.Proyecto_IoT.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,6 +14,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.*;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
 import java.util.Map;
 
 @Service
@@ -37,22 +39,38 @@ public class DeviceService {
 
     // Registrar/crear dispositivo en ThingsBoard y guardar en BD local
     @Transactional
-    public DeviceDTO registerDevice(RequestDeviceDTO request, Long userId) {
-        if (request.getName() == null || request.getName().trim().isEmpty()) {
-            throw new IllegalArgumentException("El campo 'name' del dispositivo no puede ser nulo o vacío.");
-        }
-        String type = (request.getType() == null || request.getType().trim().isEmpty()) ? "default" : request.getType();
-
-        var user = userRepository.findById(userId)
+    public Map<String, Object> registerDeviceForUser(Long userId) {
+        User user = userRepository.findById(userId)
                 .orElseThrow(() -> new IllegalArgumentException("No se proporcionó un ID de usuario válido."));
 
+        // Buscar todos los dispositivos del usuario y calcular el siguiente número disponible
+        List<Device> devices = deviceRepository.findAll().stream()
+                .filter(d -> d.getUser().getId().equals(userId))
+                .toList();
+
+        int maxNum = devices.stream()
+                .map(Device::getName)
+                .filter(name -> name.startsWith("user" + userId + "_device"))
+                .map(name -> {
+                    try {
+                        return Integer.parseInt(name.substring(("user" + userId + "_device").length()));
+                    } catch (Exception e) {
+                        return 0;
+                    }
+                })
+                .max(Integer::compareTo)
+                .orElse(0);
+
+        int nextNum = maxNum + 1;
+        String deviceName = "user" + userId + "_device" + nextNum;
+        String type = "default";
+
+        // Registrar en ThingsBoard
         String url = tbApiUrl + "/api/device";
         HttpHeaders headers = getHeaders();
-
-        // Construir el body para ThingsBoard
         Map<String, Object> tbBody = Map.of(
-            "name", request.getName(),
-            "type", type
+                "name", deviceName,
+                "type", type
         );
         HttpEntity<Map<String, Object>> requestEntity = new HttpEntity<>(tbBody, headers);
 
@@ -66,23 +84,27 @@ public class DeviceService {
             String thingsboardId = ((Map<String, String>)savedDevice.get("id")).get("id");
             // Guardar en la base de datos
             Device localDevice = new Device(
-                thingsboardId,
-                request.getName(),
-                type,
-                user
+                    thingsboardId,
+                    deviceName,
+                    type,
+                    user
             );
-            Device saved = deviceRepository.save(localDevice);
-            return new DeviceDTO(
-                saved.getId(),
-                saved.getThingsboardId(),
-                saved.getName(),
-                saved.getType(),
-                saved.getUser().getId()
+            deviceRepository.save(localDevice);
+
+            // Obtener todos los nombres de dispositivos del usuario
+            var updatedDevices = deviceRepository.findAll().stream()
+                    .filter(d -> d.getUser().getId().equals(userId))
+                    .map(Device::getName)
+                    .toList();
+
+            return Map.of(
+                    "created", deviceName,
+                    "devices", updatedDevices
             );
         } catch (HttpClientErrorException.BadRequest e) {
             String errorBody = e.getResponseBodyAsString();
             if (errorBody.contains("Device with such name already exists")) {
-                throw new IllegalArgumentException("Ya existe un dispositivo con el nombre: " + request.getName());
+                throw new IllegalArgumentException("Ya existe un dispositivo con el nombre: " + deviceName);
             }
             throw new IllegalArgumentException("Error en los datos del dispositivo: " + errorBody);
         } catch (HttpClientErrorException e) {
@@ -120,6 +142,4 @@ public class DeviceService {
         headers.setContentType(MediaType.APPLICATION_JSON);
         return headers;
     }
-
-
 }

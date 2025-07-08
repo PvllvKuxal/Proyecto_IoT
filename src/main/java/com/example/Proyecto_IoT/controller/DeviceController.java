@@ -3,7 +3,6 @@ package com.example.Proyecto_IoT.controller;
 import com.example.Proyecto_IoT.service.DeviceService;
 import com.example.Proyecto_IoT.dto.device.RequestDeviceDTO;
 import com.example.Proyecto_IoT.dto.device.DeviceDTO;
-import com.example.Proyecto_IoT.model.Device;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.http.MediaType;
@@ -18,10 +17,10 @@ public class DeviceController {
     @Autowired
     private DeviceService deviceService;
 
-    // Crear/registrar un dispositivo en ThingsBoard y en la BD
+    // Crear/registrar un dispositivo en ThingsBoard y en la BD local, sin DTO, solo userId
     @PostMapping("/register/{userId}")
-    public DeviceDTO registerDevice(@RequestBody RequestDeviceDTO requestDeviceDTO, @PathVariable Long userId) {
-        return deviceService.registerDevice(requestDeviceDTO, userId);
+    public Map<String, Object> registerDevice(@PathVariable Long userId) {
+        return deviceService.registerDeviceForUser(userId);
     }
 
     @DeleteMapping("/{deviceId}")
