@@ -9,10 +9,7 @@ import java.io.Serializable;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class DeviceDTO implements Serializable {
-    private Long id;
-    private String thingsboardId;
+public class RequestDeviceDTO implements Serializable {
     private String name;
     private String type;
-    private Long userId;
 }

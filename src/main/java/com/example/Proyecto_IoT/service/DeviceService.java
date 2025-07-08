@@ -1,87 +1,88 @@
 package com.example.Proyecto_IoT.service;
 
-import com.example.Proyecto_IoT.dto.DeviceDTO;
+import com.example.Proyecto_IoT.dto.device.RequestDeviceDTO;
+import com.example.Proyecto_IoT.dto.device.DeviceDTO;
+import com.example.Proyecto_IoT.model.Device;
+import com.example.Proyecto_IoT.repository.DeviceRepository;
+import com.example.Proyecto_IoT.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.*;
+import org.springframework.transaction.annotation.Transactional;
+
 import java.util.Map;
+
 @Service
 public class DeviceService {
 
     @Value("${thingsboard.api.url}")
     private String tbApiUrl;
 
-    @Value("${thingsboard.username}")
-    private String username;
-
-    @Value("${thingsboard.password}")
-    private String password;
-
     private final RestTemplate restTemplate = new RestTemplate();
     private final ThingsBoardAuthService thingsBoardAuthService;
+
+    @Autowired
+    private DeviceRepository deviceRepository;
+
+    @Autowired
+    private UserRepository userRepository;
 
     @Autowired
     public DeviceService(ThingsBoardAuthService thingsBoardAuthService) {
         this.thingsBoardAuthService = thingsBoardAuthService;
     }
 
-    // Registrar/crear dispositivo en ThingsBoard
-    public DeviceDTO registerDevice(DeviceDTO device) {
-        if (device.getName() == null || device.getName().trim().isEmpty()) {
+    // Registrar/crear dispositivo en ThingsBoard y guardar en BD local
+    @Transactional
+    public DeviceDTO registerDevice(RequestDeviceDTO request, Long userId) {
+        if (request.getName() == null || request.getName().trim().isEmpty()) {
             throw new IllegalArgumentException("El campo 'name' del dispositivo no puede ser nulo o vacío.");
         }
-        if (device.getType() == null || device.getType().trim().isEmpty()) {
-            device.setType("default"); // Valor por defecto requerido por ThingsBoard
-        }
+        String type = (request.getType() == null || request.getType().trim().isEmpty()) ? "default" : request.getType();
+
+        var user = userRepository.findById(userId)
+                .orElseThrow(() -> new IllegalArgumentException("No se proporcionó un ID de usuario válido."));
 
         String url = tbApiUrl + "/api/device";
-        HttpHeaders headers = new HttpHeaders();
-        headers.set("X-Authorization", "Bearer " + thingsBoardAuthService.getJwtToken());
-        headers.setContentType(MediaType.APPLICATION_JSON);
+        HttpHeaders headers = getHeaders();
 
-        HttpEntity<DeviceDTO> request = new HttpEntity<>(device, headers);
+        // Construir el body para ThingsBoard
+        Map<String, Object> tbBody = Map.of(
+            "name", request.getName(),
+            "type", type
+        );
+        HttpEntity<Map<String, Object>> requestEntity = new HttpEntity<>(tbBody, headers);
 
         try {
-            ResponseEntity<DeviceDTO> response = restTemplate.postForEntity(url, request, DeviceDTO.class);
-            DeviceDTO savedDevice = response.getBody();
+            ResponseEntity<Map> response = restTemplate.postForEntity(url, requestEntity, Map.class);
+            Map savedDevice = response.getBody();
 
-            // --- Configuración automática de credenciales MQTT_BASIC ---
-            if (savedDevice != null && savedDevice.getId() != null && savedDevice.getId().getId() != null) {
-                String deviceId = savedDevice.getId().getId();
-                String credentialsUrl = tbApiUrl + "/api/device/" + deviceId + "/credentials";
-
-                // Puedes personalizar estos valores o generarlos aleatoriamente
-                String clientId = "client-" + deviceId;
-                String userName = "user-" + deviceId;
-                String password = "pass-" + deviceId;
-
-                String credentialsValue = String.format("{\"clientId\":\"%s\",\"userName\":\"%s\",\"password\":\"%s\"}", clientId, userName, password);
-
-                Map<String, Object> credBody = new java.util.HashMap<>();
-                credBody.put("credentialsType", "MQTT_BASIC");
-                credBody.put("credentialsId", clientId);
-                credBody.put("credentialsValue", credentialsValue);
-
-                HttpEntity<Map<String, Object>> credRequest = new HttpEntity<>(credBody, headers);
-                restTemplate.exchange(credentialsUrl, HttpMethod.PUT, credRequest, Void.class);
-
-                // Puedes devolver los datos MQTT en el DeviceDTO usando additionalInfo
-                Map<String, Object> mqttInfo = new java.util.HashMap<>();
-                mqttInfo.put("clientId", clientId);
-                mqttInfo.put("userName", userName);
-                mqttInfo.put("password", password);
-                savedDevice.setAdditionalInfo(mqttInfo);
+            if (savedDevice == null || savedDevice.get("id") == null) {
+                throw new RuntimeException("No se pudo obtener el ID del dispositivo de ThingsBoard.");
             }
-
-            return savedDevice;
+            String thingsboardId = ((Map<String, String>)savedDevice.get("id")).get("id");
+            // Guardar en la base de datos
+            Device localDevice = new Device(
+                thingsboardId,
+                request.getName(),
+                type,
+                user
+            );
+            Device saved = deviceRepository.save(localDevice);
+            return new DeviceDTO(
+                saved.getId(),
+                saved.getThingsboardId(),
+                saved.getName(),
+                saved.getType(),
+                saved.getUser().getId()
+            );
         } catch (HttpClientErrorException.BadRequest e) {
-            // Capturar específicamente errores 400 de ThingsBoard
             String errorBody = e.getResponseBodyAsString();
             if (errorBody.contains("Device with such name already exists")) {
-                throw new IllegalArgumentException("Ya existe un dispositivo con el nombre: " + device.getName());
+                throw new IllegalArgumentException("Ya existe un dispositivo con el nombre: " + request.getName());
             }
             throw new IllegalArgumentException("Error en los datos del dispositivo: " + errorBody);
         } catch (HttpClientErrorException e) {
@@ -93,8 +94,7 @@ public class DeviceService {
 
     public void deleteDevice(String deviceId) {
         String url = tbApiUrl + "/api/device/" + deviceId;
-        HttpHeaders headers = new HttpHeaders();
-        headers.set("X-Authorization", "Bearer " + thingsBoardAuthService.getJwtToken());
+        HttpHeaders headers = getHeaders();
         HttpEntity<Void> request = new HttpEntity<>(headers);
         try {
             restTemplate.exchange(url, HttpMethod.DELETE, request, Void.class);
@@ -107,11 +107,19 @@ public class DeviceService {
 
     public Map<String, Object> getTelemetry(String deviceId) {
         String url = tbApiUrl + "/api/plugins/telemetry/DEVICE/" + deviceId + "/values/timeseries?keys=temperatura,humedad,presion";
-        HttpHeaders headers = new HttpHeaders();
-        headers.set("X-Authorization", "Bearer " + thingsBoardAuthService.getJwtToken());
+        HttpHeaders headers = getHeaders();
         HttpEntity<Void> request = new HttpEntity<>(headers);
 
         ResponseEntity<Map> response = restTemplate.exchange(url, HttpMethod.GET, request, Map.class);
         return response.getBody();
     }
+
+    private HttpHeaders getHeaders() {
+        HttpHeaders headers = new HttpHeaders();
+        headers.set("X-Authorization", "Bearer " + thingsBoardAuthService.getJwtToken());
+        headers.setContentType(MediaType.APPLICATION_JSON);
+        return headers;
+    }
+
+
 }
