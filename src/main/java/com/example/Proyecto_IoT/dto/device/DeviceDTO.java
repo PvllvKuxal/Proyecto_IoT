@@ -1,10 +1,9 @@
-package com.example.Proyecto_IoT.dto;
+package com.example.Proyecto_IoT.dto.device;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import java.io.Serializable;
 
 //las etiquetas de lombok no pescaron
-@JsonIgnoreProperties(ignoreUnknown = true)// Ignora propiedades desconocidas en la respuesta JSON
 public class DeviceDTO implements Serializable {
     private IdWrapper id;
     private String name;

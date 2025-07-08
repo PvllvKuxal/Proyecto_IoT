@@ -1,7 +1,7 @@
 package com.example.Proyecto_IoT.controller;
 
-import com.example.Proyecto_IoT.dto.UserDTO;
-import com.example.Proyecto_IoT.dto.AuthResponseDTO;
+import com.example.Proyecto_IoT.dto.user.UserDTO;
+import com.example.Proyecto_IoT.dto.user.AuthResponseDTO;
 import com.example.Proyecto_IoT.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;

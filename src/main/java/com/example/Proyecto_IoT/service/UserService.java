@@ -1,8 +1,8 @@
 package com.example.Proyecto_IoT.service;
 
-import com.example.Proyecto_IoT.dto.UserDTO;
-import com.example.Proyecto_IoT.dto.AuthResponseDTO;
-import com.example.Proyecto_IoT.dto.DeviceDTO;
+import com.example.Proyecto_IoT.dto.user.UserDTO;
+import com.example.Proyecto_IoT.dto.user.AuthResponseDTO;
+import com.example.Proyecto_IoT.dto.device.DeviceDTO;
 import com.example.Proyecto_IoT.model.User;
 import com.example.Proyecto_IoT.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
