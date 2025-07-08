@@ -18,11 +18,13 @@ public class GlobalExceptionHandler {
 
         if (ex instanceof IllegalArgumentException) {
             status = HttpStatus.BAD_REQUEST.value();
-            message = ex.getMessage();
         } else if (ex instanceof org.springframework.web.client.HttpClientErrorException.NotFound) {
             status = HttpStatus.NOT_FOUND.value();
             message = "No encontrado";
-        } else if (ex.getMessage() != null && !ex.getMessage().isEmpty()) {
+        }
+
+        // Siempre mostrar el mensaje de la excepción si existe
+        if (ex.getMessage() != null && !ex.getMessage().isEmpty()) {
             message = ex.getMessage();
         }
 
@@ -33,4 +35,3 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(status).body(error);
     }
 }
-
