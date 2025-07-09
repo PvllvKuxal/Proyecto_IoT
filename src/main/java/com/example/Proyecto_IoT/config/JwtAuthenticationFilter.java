@@ -29,8 +29,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
             // Excluir rutas públicas de la autenticación
             if (requestPath.equals("/")
-                    || requestPath.startsWith("/auth")
-                    || requestPath.startsWith("/api/devices")) {
+                    || requestPath.startsWith("/auth")){
                 filterChain.doFilter(request, response);
                 return;
             }
