@@ -1,6 +1,7 @@
 package com.example.Proyecto_IoT.controller;
 
 import com.example.Proyecto_IoT.dto.device.DeviceDTO;
+import com.example.Proyecto_IoT.dto.device.TelemetryDTO;
 import com.example.Proyecto_IoT.service.device.DeviceService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -17,7 +18,6 @@ public class DeviceController {
 
     @Autowired
     private DeviceService deviceService;
-
     // Crear/registrar un dispositivo en ThingsBoard y en la BD local
     @PostMapping("/register/{userId}")
     public ResponseEntity<?> registerDevice(@PathVariable Long userId) {
@@ -36,7 +36,7 @@ public class DeviceController {
     }
 
     @GetMapping("/{deviceId}/telemetry")
-    public Map<String, Object> getTelemetry(@PathVariable String deviceId) {
+    public TelemetryDTO getTelemetry(@PathVariable String deviceId) {
         return deviceService.getTelemetry(deviceId);
     }
 
@@ -54,7 +54,7 @@ public class DeviceController {
             try {
                 while (true) {
                     try {
-                        Map<String, Object> data = deviceService.getTelemetry(deviceId);
+                        TelemetryDTO data = deviceService.getTelemetry(deviceId);
                         emitter.send(data);
                     } catch (Exception e) {
                         try {

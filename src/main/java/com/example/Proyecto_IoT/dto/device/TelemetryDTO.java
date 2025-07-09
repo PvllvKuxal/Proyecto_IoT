@@ -1,14 +1,16 @@
 package com.example.Proyecto_IoT.dto.device;
 
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 import java.util.Map;
 
 @Data
+@Builder
 @NoArgsConstructor
 @AllArgsConstructor
 public class TelemetryDTO {
-    private Map<String, Object> data;
+    private String timeStamp;
+    private String temperatura;
+    private String humedad;
+    private String presion;
 }
