@@ -1,6 +1,7 @@
 package com.example.Proyecto_IoT.service.device;
 
 import com.example.Proyecto_IoT.dto.device.DeviceDTO;
+import com.example.Proyecto_IoT.dto.medicion.TelemetryDTO;
 import com.example.Proyecto_IoT.model.Device;
 import com.example.Proyecto_IoT.model.User;
 import com.example.Proyecto_IoT.repository.DeviceRepository;
@@ -138,13 +139,45 @@ public class DeviceService {
         }
     }
 
-    public Map<String, Object> getTelemetry(String deviceId) {
+    public TelemetryDTO getTelemetry(String deviceId) {
         String url = tbApiUrl + "/api/plugins/telemetry/DEVICE/" + deviceId + "/values/timeseries?keys=temperatura,humedad,presion";
         HttpHeaders headers = getHeaders();
         HttpEntity<Void> request = new HttpEntity<>(headers);
 
         ResponseEntity<Map> response = restTemplate.exchange(url, HttpMethod.GET, request, Map.class);
-        return response.getBody();
+        Map<String, Object> body = response.getBody();
+
+        String temperatura = null;
+        String humedad = null;
+        String presion = null;
+        String timeStamp = null;
+
+        if (body != null) {
+            // Extraer cada valor del primer elemento de la lista correspondiente
+            timeStamp = extraerValor(body, "temperatura", "ts");
+            temperatura = extraerValor(body, "temperatura", "value");
+            humedad = extraerValor(body, "humedad", "value");
+            presion = extraerValor(body, "presion", "value");
+        }
+
+        return TelemetryDTO.builder()
+                .timeStamp(timeStamp)
+                .temperatura(temperatura)
+                .humedad(humedad)
+                .presion(presion)
+                .build();
+    }
+
+    private String extraerValor(Map<String, Object> body, String key, String dato) {
+        String valor = null;
+        if (body.containsKey(key)) {
+            Object lista = body.get(key);
+            if (lista instanceof List<?> && !((List<?>) lista).isEmpty()) {
+                Map<String, Object> obj = (Map<String, Object>) ((List<?>) lista).get(0);
+                valor = obj.get(dato) != null ? obj.get(dato).toString() : null;
+            }
+        }
+        return valor;
     }
 
     private HttpHeaders getHeaders() {
