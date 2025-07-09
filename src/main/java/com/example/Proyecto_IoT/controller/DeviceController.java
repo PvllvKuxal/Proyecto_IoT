@@ -1,8 +1,6 @@
 package com.example.Proyecto_IoT.controller;
 
-import com.example.Proyecto_IoT.service.DeviceService;
-import com.example.Proyecto_IoT.dto.device.RequestDeviceDTO;
-import com.example.Proyecto_IoT.dto.device.DeviceDTO;
+import com.example.Proyecto_IoT.service.device.DeviceService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.http.MediaType;

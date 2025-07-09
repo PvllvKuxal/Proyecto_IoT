@@ -2,8 +2,10 @@ package com.example.Proyecto_IoT.controller;
 
 import com.example.Proyecto_IoT.dto.user.UserDTO;
 import com.example.Proyecto_IoT.dto.user.AuthResponseDTO;
-import com.example.Proyecto_IoT.service.AuthService;
+import com.example.Proyecto_IoT.service.user.AuthService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -18,9 +20,11 @@ public class AuthController {
     }
 
     @PostMapping("/register")
-    public ResponseEntity<String> register(@RequestBody UserDTO userDTO) {
-        authService.register(userDTO);
-        return ResponseEntity.ok("Usuario registrado correctamente");
+    public ResponseEntity<?>  register(@RequestBody UserDTO userDTO) {
+        AuthResponseDTO response =authService.register(userDTO);
+        return ResponseEntity.status(HttpStatus.CREATED)
+                .contentType(MediaType.APPLICATION_JSON)
+                .body(response);
     }
 
     @PostMapping("/login")
