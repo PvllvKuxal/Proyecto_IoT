@@ -1,7 +1,7 @@
 package com.example.Proyecto_IoT.controller;
 
 import com.example.Proyecto_IoT.dto.device.DeviceDTO;
-import com.example.Proyecto_IoT.dto.device.TelemetryDTO;
+import com.example.Proyecto_IoT.dto.medicion.TelemetryDTO;
 import com.example.Proyecto_IoT.service.device.DeviceService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;

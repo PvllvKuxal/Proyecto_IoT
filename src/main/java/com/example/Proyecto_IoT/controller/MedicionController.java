@@ -1,6 +1,6 @@
 package com.example.Proyecto_IoT.controller;
 
-import com.example.Proyecto_IoT.dto.device.MedicionDTO;
+import com.example.Proyecto_IoT.dto.medicion.MedicionDTO;
 import com.example.Proyecto_IoT.service.device.MedicionService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;

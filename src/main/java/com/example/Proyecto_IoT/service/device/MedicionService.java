@@ -1,7 +1,7 @@
 package com.example.Proyecto_IoT.service.device;
 
-import com.example.Proyecto_IoT.dto.device.MedicionDTO;
-import com.example.Proyecto_IoT.dto.device.TelemetryDTO;
+import com.example.Proyecto_IoT.dto.medicion.MedicionDTO;
+import com.example.Proyecto_IoT.dto.medicion.TelemetryDTO;
 import com.example.Proyecto_IoT.model.Device;
 import com.example.Proyecto_IoT.model.Medicion;
 import com.example.Proyecto_IoT.model.User;
@@ -10,7 +10,6 @@ import com.example.Proyecto_IoT.repository.MedicionRepository;
 import com.example.Proyecto_IoT.util.PdfGenerator;
 import lombok.Getter;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import java.util.*;

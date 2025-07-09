@@ -1,8 +1,6 @@
-package com.example.Proyecto_IoT.dto.device;
+package com.example.Proyecto_IoT.dto.medicion;
 
 import lombok.*;
-
-import java.util.Map;
 
 @Data
 @Builder

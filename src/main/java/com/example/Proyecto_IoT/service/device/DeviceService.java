@@ -1,7 +1,7 @@
 package com.example.Proyecto_IoT.service.device;
 
 import com.example.Proyecto_IoT.dto.device.DeviceDTO;
-import com.example.Proyecto_IoT.dto.device.TelemetryDTO;
+import com.example.Proyecto_IoT.dto.medicion.TelemetryDTO;
 import com.example.Proyecto_IoT.model.Device;
 import com.example.Proyecto_IoT.model.User;
 import com.example.Proyecto_IoT.repository.DeviceRepository;

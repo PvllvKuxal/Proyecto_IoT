@@ -1,4 +1,4 @@
-package com.example.Proyecto_IoT.dto.device;
+package com.example.Proyecto_IoT.dto.medicion;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
