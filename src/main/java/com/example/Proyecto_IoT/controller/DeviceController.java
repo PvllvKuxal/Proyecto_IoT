@@ -1,7 +1,10 @@
 package com.example.Proyecto_IoT.controller;
 
+import com.example.Proyecto_IoT.dto.device.DeviceDTO;
 import com.example.Proyecto_IoT.service.device.DeviceService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.http.MediaType;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
@@ -15,15 +18,21 @@ public class DeviceController {
     @Autowired
     private DeviceService deviceService;
 
-    // Crear/registrar un dispositivo en ThingsBoard y en la BD local, sin DTO, solo userId
+    // Crear/registrar un dispositivo en ThingsBoard y en la BD local
     @PostMapping("/register/{userId}")
-    public Map<String, Object> registerDevice(@PathVariable Long userId) {
-        return deviceService.registerDeviceForUser(userId);
+    public ResponseEntity<?> registerDevice(@PathVariable Long userId) {
+        DeviceDTO response = deviceService.registerDeviceForUser(userId);
+        return ResponseEntity.status(HttpStatus.CREATED)
+                .contentType(MediaType.APPLICATION_JSON)
+                .body(response);
     }
 
     @DeleteMapping("/{deviceId}")
-    public void deleteDevice(@PathVariable String deviceId) {
+    public ResponseEntity<?> deleteDevice(@PathVariable String deviceId) {
         deviceService.deleteDevice(deviceId);
+        return ResponseEntity.ok()
+                .contentType(MediaType.APPLICATION_JSON)
+                .body(Map.of("message", "Dispositivo eliminado correctamente"));
     }
 
     @GetMapping("/{deviceId}/telemetry")

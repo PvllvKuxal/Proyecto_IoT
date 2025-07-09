@@ -1,5 +1,6 @@
 package com.example.Proyecto_IoT.service.device;
 
+import com.example.Proyecto_IoT.dto.device.DeviceDTO;
 import com.example.Proyecto_IoT.model.Device;
 import com.example.Proyecto_IoT.model.User;
 import com.example.Proyecto_IoT.repository.DeviceRepository;
@@ -37,7 +38,7 @@ public class DeviceService {
 
     // Registrar/crear dispositivo en ThingsBoard y guardar en BD local
     @Transactional
-    public Map<String, Object> registerDeviceForUser(Long userId) {
+    public DeviceDTO registerDeviceForUser(Long userId) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new IllegalArgumentException("No se proporcionó un ID de usuario válido."));
 
@@ -80,6 +81,10 @@ public class DeviceService {
                 throw new RuntimeException("No se pudo obtener el ID del dispositivo de ThingsBoard.");
             }
             String thingsboardId = ((Map<String, String>)savedDevice.get("id")).get("id");
+
+            if (thingsboardId == null) {
+                throw new RuntimeException("No se pudo obtener el ID del dispositivo de ThingsBoard.");
+            }
             // Guardar en la base de datos
             Device localDevice = new Device(
                     thingsboardId,
@@ -89,16 +94,13 @@ public class DeviceService {
             );
             deviceRepository.save(localDevice);
 
-            // Obtener todos los nombres de dispositivos del usuario
-            var updatedDevices = deviceRepository.findAll().stream()
-                    .filter(d -> d.getUser().getId().equals(userId))
-                    .map(Device::getName)
-                    .toList();
+            return DeviceDTO.builder()
+                    .id(localDevice.getId())
+                    .thingsboardId(thingsboardId)
+                    .name(localDevice.getName())
+                    .type(localDevice.getType())
+                    .build();
 
-            return Map.of(
-                    "created", deviceName,
-                    "devices", updatedDevices
-            );
         } catch (HttpClientErrorException.BadRequest e) {
             String errorBody = e.getResponseBodyAsString();
             if (errorBody.contains("Device with such name already exists")) {
@@ -113,6 +115,17 @@ public class DeviceService {
     }
 
     public void deleteDevice(String deviceId) {
+        // Primero, eliminar el dispositivo de ThingsBoard
+        if (deviceId == null || deviceId.isEmpty()) {
+            throw new IllegalArgumentException("El ID del dispositivo no puede ser nulo o vacío");
+        }
+
+        Device device = deviceRepository.findByThingsboardId(deviceId);
+        if (device == null) {
+            throw new IllegalArgumentException("Dispositivo no encontrado en la base de datos");
+        }
+        deviceRepository.delete(device);
+
         String url = tbApiUrl + "/api/device/" + deviceId;
         HttpHeaders headers = getHeaders();
         HttpEntity<Void> request = new HttpEntity<>(headers);
