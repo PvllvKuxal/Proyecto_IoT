@@ -15,7 +15,7 @@ import java.util.List;
 @Getter
 @Setter
 @Entity
-@Table(name="users", uniqueConstraints = {@UniqueConstraint(columnNames = {"email"})})
+@Table(name="usuario", uniqueConstraints = {@UniqueConstraint(columnNames = {"email"})})
 public class User implements UserDetails{
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

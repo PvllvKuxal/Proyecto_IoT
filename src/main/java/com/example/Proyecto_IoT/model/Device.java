@@ -11,7 +11,7 @@ import lombok.Setter;
 @Getter
 @Setter
 @Entity
-@Table(name = "devices")
+@Table(name = "dispositivo", uniqueConstraints = {@UniqueConstraint(columnNames = {"thingsboard_id"})})
 public class Device {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
