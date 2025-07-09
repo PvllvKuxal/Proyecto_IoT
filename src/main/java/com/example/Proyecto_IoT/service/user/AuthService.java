@@ -2,7 +2,6 @@ package com.example.Proyecto_IoT.service.user;
 
 import com.example.Proyecto_IoT.dto.user.UserDTO;
 import com.example.Proyecto_IoT.dto.user.AuthResponseDTO;
-import com.example.Proyecto_IoT.dto.device.DeviceDTO;
 import com.example.Proyecto_IoT.model.User;
 import com.example.Proyecto_IoT.repository.UserRepository;
 import com.example.Proyecto_IoT.repository.DeviceRepository;
@@ -12,11 +11,8 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
-import java.util.Collections;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
