@@ -1,6 +1,6 @@
 package com.example.Proyecto_IoT.util;
 
-import com.example.Proyecto_IoT.dto.device.TelemetryDTO;
+import com.example.Proyecto_IoT.dto.medicion.TelemetryDTO;
 import com.example.Proyecto_IoT.model.Device;
 import com.example.Proyecto_IoT.model.User;
 import com.lowagie.text.Document;
@@ -12,10 +12,11 @@ import org.springframework.stereotype.Service;
 
 import java.io.File;
 import java.io.FileOutputStream;
+import java.time.Instant;
 import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
-import java.util.Map;
 
 @Service
 public class PdfGenerator {
@@ -43,7 +44,7 @@ public class PdfGenerator {
 
             if (!datos.isEmpty()) {
                 // Definir los encabezados según los atributos de TelemetryDTO
-                String[] headers = {"timeStamp", "temperatura", "humedad", "presion"};
+                String[] headers = {"tiempo", "temperatura", "humedad", "presion"};
                 PdfPTable table = new PdfPTable(headers.length);
                 // Encabezados
                 for (String header : headers) {
@@ -51,7 +52,18 @@ public class PdfGenerator {
                 }
                 // Filas
                 for (TelemetryDTO muestra : datos) {
-                    table.addCell(muestra.getTimeStamp() != null ? muestra.getTimeStamp() : "");
+                    // Conversión segura del timestamp a HH:mm:ss
+                    String hora = "";
+                    if (muestra.getTimeStamp() != null) {
+                        try {
+                            long ts = Long.parseLong(muestra.getTimeStamp());
+                            LocalDateTime ldt = Instant.ofEpochMilli(ts).atZone(ZoneId.systemDefault()).toLocalDateTime();
+                            hora = ldt.format(DateTimeFormatter.ofPattern("HH:mm:ss"));
+                        } catch (Exception e) {
+                            hora = muestra.getTimeStamp(); // fallback: mostrar el valor original si falla la conversión
+                        }
+                    }
+                    table.addCell(hora);
                     table.addCell(muestra.getTemperatura() != null ? muestra.getTemperatura() : "");
                     table.addCell(muestra.getHumedad() != null ? muestra.getHumedad() : "");
                     table.addCell(muestra.getPresion() != null ? muestra.getPresion() : "");
