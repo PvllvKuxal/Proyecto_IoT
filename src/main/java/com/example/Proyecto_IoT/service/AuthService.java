@@ -15,7 +15,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 @Service
-public class UserService {
+public class AuthService {
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
     @Autowired
@@ -23,7 +23,7 @@ public class UserService {
     // Aquí se podrían inyectar servicios de devices y pdfs en el futuro
 
     @Autowired
-    public UserService(UserRepository userRepository, PasswordEncoder passwordEncoder) {
+    public AuthService(UserRepository userRepository, PasswordEncoder passwordEncoder) {
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
     }
@@ -38,7 +38,7 @@ public class UserService {
 
     public AuthResponseDTO login(UserDTO userDTO) {
         User user = userRepository.findByEmail(userDTO.getEmail())
-                .orElseThrow(() -> new RuntimeException("Usuario o contraseña incorrectos"));
+                .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
         if (!passwordEncoder.matches(userDTO.getPassword(), user.getPassword())) {
             throw new RuntimeException("Usuario o contraseña incorrectos");
         }
