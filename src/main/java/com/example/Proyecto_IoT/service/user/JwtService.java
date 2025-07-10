@@ -28,7 +28,7 @@ public class JwtService {
     }
 
     // Creación del token JWT
-    private String getToken(Map<String,Object> extraClaims, UserDetails user) {
+    public String getToken(Map<String,Object> extraClaims, UserDetails user) {
         return Jwts
                 .builder()
                 .setClaims(extraClaims)

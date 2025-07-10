@@ -42,8 +42,7 @@ public class AuthService {
         }
         Map<String, Object> extraClaims = new HashMap<>();
         extraClaims.put("id", user.getId());
-        jwtService.setExtraClaims(extraClaims);
-        String token = jwtService.getToken(user);
+        String token = jwtService.getToken(extraClaims, user);
         return AuthResponseDTO.builder()
                 .token(token)
                 .build();

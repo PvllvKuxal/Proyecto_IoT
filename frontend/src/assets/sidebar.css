@@ -1,0 +1,156 @@
+/* Sidebar Figma style + fixed and collapsible */
+.sidebar {
+  position: fixed;
+  left: 0;
+  top: 0;
+  z-index: 10;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  align-items: center;
+  width: 260px;
+  height: 100vh;
+  background: #181c23;
+  color: #fff;
+  padding: 32px 0 24px 0;
+  transition: width 0.2s;
+  overflow-y: auto;
+  box-sizing: border-box;
+}
+.sidebar-collapsed {
+  width: 80px;
+}
+.sidebar-logo {
+  font-size: 1.3rem;
+  font-weight: 700;
+  letter-spacing: 2px;
+  margin-bottom: 32px;
+  color: #fff;
+  text-align: left;
+  width: 100%;
+  padding-left: 32px;
+}
+.sidebar-collapse-btn {
+  background: none;
+  border: none;
+  margin-bottom: 32px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  width: 100%;
+  padding-right: 32px;
+}
+.sidebar-nav {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  width: 100%;
+}
+.sidebar-link {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 12px 32px;
+  font-size: 1.08rem;
+  font-weight: 500;
+  color: #fff;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background 0.2s, color 0.2s;
+}
+.sidebar-link.active, .sidebar-link:hover {
+  background: #23283a;
+  color: #60a5fa;
+}
+.sidebar-icon-svg {
+  display: flex;
+  align-items: center;
+  font-size: 1.3rem;
+}
+.sidebar-link-text {
+  flex: 1;
+}
+.sidebar-arrow {
+  font-size: 0.9rem;
+  margin-left: auto;
+}
+.sidebar-sublinks {
+  padding-left: 64px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.sidebar-sublink {
+  font-size: 0.97rem;
+  color: #b3b3b3;
+  padding: 4px 0;
+  cursor: pointer;
+  transition: color 0.2s;
+}
+.sidebar-sublink:hover {
+  color: #60a5fa;
+}
+.sidebar-bottom {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  width: 100%;
+  padding-bottom: 4px;
+  padding-top: 4px;
+  margin-bottom: 0;
+  margin-top: 0;
+  position: relative;
+  box-sizing: border-box;
+}
+.sidebar-user-avatar {
+  background: #2563eb;
+  color: #fff;
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.3rem;
+  font-weight: 700;
+  margin-bottom: 6px;
+}
+.sidebar-user-info {
+  text-align: center;
+  width: 100%;
+}
+.sidebar-user-name {
+  font-size: 0.97rem;
+  font-weight: 600;
+}
+.sidebar-user-email {
+  font-size: 0.85rem;
+  color: #b3b3b3;
+}
+.sidebar-logout-btn {
+  margin-top: 8px;
+  width: 90%;
+  padding: 12px 0;
+  background: #ef4444;
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  font-size: 1rem;
+  font-weight: 600;
+  font-family: inherit;
+  cursor: pointer;
+  transition: background 0.2s;
+  display: block;
+  position: relative;
+  bottom: 0;
+}
+.sidebar-logout-btn svg {
+  display: block;
+}
+.sidebar-svg-icon {
+  width: 22px;
+  height: 22px;
+  display: block;
+} 

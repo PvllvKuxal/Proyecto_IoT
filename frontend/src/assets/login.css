@@ -1,0 +1,126 @@
+/* Layout principal */
+.login-layout {
+  display: flex;
+  height: 100vh;
+  font-family: 'Segoe UI', Arial, sans-serif;
+  background: #fff;
+}
+
+.login-image-container {
+  width: 33.3333%;
+  background: #f5f8fd;
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  padding-left: 0;
+  height: 100vh;
+}
+
+.login-image {
+  height: 100%;
+  width: auto;
+  object-fit: contain;
+}
+
+.login-form-container {
+  width: 66.6666%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+}
+
+.login-form {
+  width: 380px;
+  background: #fff;
+  display: flex;
+  flex-direction: column;
+  gap: 22px;
+}
+
+.login-title {
+  font-size: 2rem;
+  font-weight: 700;
+  color: #222;
+  margin-bottom: 8px;
+}
+
+.login-field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.login-field label {
+  font-size: 0.97rem;
+  color: #444;
+  font-weight: 500;
+}
+
+.login-field input {
+  padding: 12px 14px;
+  border-radius: 8px;
+  border: 1px solid #e0e0e0;
+  background: #f7f7fa;
+  font-size: 1rem;
+  color: #222;
+  outline: none;
+  transition: border 0.2s;
+}
+.login-field input:focus {
+  border: 1.5px solid #2563eb;
+  background: #fff;
+}
+
+.login-btn {
+  width: 100%;
+  background: #2563eb;
+  color: #fff;
+  padding: 14px 0;
+  border: none;
+  border-radius: 8px;
+  font-size: 1.1rem;
+  font-weight: 700;
+  cursor: pointer;
+  margin-top: 8px;
+  transition: background 0.2s;
+}
+.login-btn:hover {
+  background: #1d4ed8;
+}
+
+.login-links {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-top: 4px;
+}
+
+.login-link {
+  color: #2563eb;
+  text-decoration: none;
+  font-size: 0.97rem;
+  transition: text-decoration 0.2s;
+}
+.login-link:hover {
+  text-decoration: underline;
+}
+
+.login-secondary {
+  color: #888;
+  font-size: 0.97rem;
+}
+
+@media (max-width: 900px) {
+  .login-layout {
+    flex-direction: column;
+  }
+  .login-image-container, .login-form-container {
+    width: 100%;
+    min-height: 50vh;
+  }
+  .login-image {
+    max-height: 300px;
+    width: 100%;
+  }
+} 
